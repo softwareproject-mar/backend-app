@@ -28,6 +28,14 @@ class TargetService
         return $query->paginate($perPage);
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
+    public function create(array $data): Target
+    {
+        return Target::create($data);
+    }
+
     public function find(string $idKs, string $tglTgt): Target
     {
         $record = Target::where('ID_KS', $idKs)
@@ -39,5 +47,22 @@ class TargetService
         }
 
         return $record;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    public function update(string $idKs, string $tglTgt, array $data): Target
+    {
+        $record = $this->find($idKs, $tglTgt);
+        $record->update($data);
+
+        return $record;
+    }
+
+    public function delete(string $idKs, string $tglTgt): void
+    {
+        $record = $this->find($idKs, $tglTgt);
+        $record->delete();
     }
 }

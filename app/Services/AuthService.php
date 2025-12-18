@@ -12,16 +12,24 @@ class AuthService
      * Register a new user.
      *
      * @param array<string, mixed> $data
+     * @param bool $otpVerified
      */
-    public function register(array $data): User
+    public function register(array $data, bool $otpVerified = false): User
     {
-        return User::create([
+        $userData = [
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'role' => $data['role'] ?? 'user',
             'is_active' => true,
-        ]);
+        ];
+
+        // If OTP verified, mark email as verified
+        if ($otpVerified) {
+            $userData['email_verified_at'] = now();
+        }
+
+        return User::create($userData);
     }
 
     /**

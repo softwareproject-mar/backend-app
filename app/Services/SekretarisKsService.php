@@ -2,26 +2,26 @@
 
 namespace App\Services;
 
-use App\Models\DataLo;
+use App\Models\SekretarisKs;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-class DataLoService
+class SekretarisKsService
 {
     /**
-     * Paginate data_lo with optional filters.
+     * Paginate sekre_ks with optional filters.
      *
      * @param array<string, mixed> $filters
      */
     public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = DataLo::query();
+        $query = SekretarisKs::query();
 
-        if (isset($filters['ID_LO'])) {
-            $query->where('ID_LO', $filters['ID_LO']);
-        }
+        $allowedFilters = ['ID_SEKRE', 'NO_AGT', 'NAMA', 'STAT'];
 
-        if (isset($filters['NO_AGT'])) {
-            $query->where('NO_AGT', $filters['NO_AGT']);
+        foreach ($allowedFilters as $field) {
+            if (isset($filters[$field])) {
+                $query->where($field, $filters[$field]);
+            }
         }
 
         return $query->paginate($perPage);
@@ -30,20 +30,20 @@ class DataLoService
     /**
      * @param array<string, mixed> $data
      */
-    public function create(array $data): DataLo
+    public function create(array $data): SekretarisKs
     {
-        return DataLo::create($data);
+        return SekretarisKs::create($data);
     }
 
-    public function find(string $id): DataLo
+    public function find(string $id): SekretarisKs
     {
-        return DataLo::findOrFail($id);
+        return SekretarisKs::findOrFail($id);
     }
 
     /**
      * @param array<string, mixed> $data
      */
-    public function update(string $id, array $data): DataLo
+    public function update(string $id, array $data): SekretarisKs
     {
         $record = $this->find($id);
         $record->update($data);

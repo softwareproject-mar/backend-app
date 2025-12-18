@@ -1,0 +1,374 @@
+{
+  "info": {
+    "name": "Backend API - Full CRUD Collection",
+    "_postman_id": "backend-api-crud-2025",
+    "description": "Complete API collection for testing all CRUD endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set(\"auth_token\", jsonData.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ketua KS",
+      "item": [
+        {
+          "name": "Create Ketua KS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ID_KET\": \"KET001\",\n  \"NO_AGT\": \"AGT001\",\n  \"NAMA\": \"Ahmad Suryanto\",\n  \"STAT\": \"AKTIF\",\n  \"TGL_STAT\": \"2025-01-01\",\n  \"NO_SK\": 123\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/ketua-ks",
+              "host": ["{{base_url}}"],
+              "path": ["ketua-ks"]
+            }
+          }
+        },
+        {
+          "name": "Get All Ketua KS",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ketua-ks?per_page=15",
+              "host": ["{{base_url}}"],
+              "path": ["ketua-ks"],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "15"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get One Ketua KS",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ketua-ks/KET001",
+              "host": ["{{base_url}}"],
+              "path": ["ketua-ks", "KET001"]
+            }
+          }
+        },
+        {
+          "name": "Update Ketua KS",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"NAMA\": \"Ahmad Suryanto Updated\",\n  \"STAT\": \"TIDAK_AKTIF\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/ketua-ks/KET001",
+              "host": ["{{base_url}}"],
+              "path": ["ketua-ks", "KET001"]
+            }
+          }
+        },
+        {
+          "name": "Delete Ketua KS",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ketua-ks/KET001",
+              "host": ["{{base_url}}"],
+              "path": ["ketua-ks", "KET001"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Target",
+      "item": [
+        {
+          "name": "Create Target",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ID_KS\": \"KS001\",\n  \"TGL_TGT\": \"2025-01\",\n  \"JLH_AGT_BR\": 100,\n  \"STR_SP\": \"50000000\",\n  \"SLD_SP\": \"45000000\",\n  \"REK_SHR\": 50,\n  \"REK_SPD\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/target",
+              "host": ["{{base_url}}"],
+              "path": ["target"]
+            }
+          }
+        },
+        {
+          "name": "Get All Target",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/target?per_page=15",
+              "host": ["{{base_url}}"],
+              "path": ["target"],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "15"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get One Target",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/target/KS001/2025-01",
+              "host": ["{{base_url}}"],
+              "path": ["target", "KS001", "2025-01"]
+            }
+          }
+        },
+        {
+          "name": "Update Target",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"JLH_AGT_BR\": 105,\n  \"STR_SP\": \"52000000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/target/KS001/2025-01",
+              "host": ["{{base_url}}"],
+              "path": ["target", "KS001", "2025-01"]
+            }
+          }
+        },
+        {
+          "name": "Delete Target",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/target/KS001/2025-01",
+              "host": ["{{base_url}}"],
+              "path": ["target", "KS001", "2025-01"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard?ID_KS=KS001&TGL_TGT=2025-01",
+              "host": ["{{base_url}}"],
+              "path": ["dashboard"],
+              "query": [
+                {
+                  "key": "ID_KS",
+                  "value": "KS001"
+                },
+                {
+                  "key": "TGL_TGT",
+                  "value": "2025-01"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost/backend-app/public/api",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

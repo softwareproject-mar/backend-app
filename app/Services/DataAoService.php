@@ -27,8 +27,33 @@ class DataAoService
         return $query->paginate($perPage);
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
+    public function create(array $data): DataAo
+    {
+        return DataAo::create($data);
+    }
+
     public function find(string $id): DataAo
     {
         return DataAo::findOrFail($id);
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    public function update(string $id, array $data): DataAo
+    {
+        $record = $this->find($id);
+        $record->update($data);
+
+        return $record;
+    }
+
+    public function delete(string $id): void
+    {
+        $record = $this->find($id);
+        $record->delete();
     }
 }

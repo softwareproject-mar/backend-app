@@ -31,8 +31,33 @@ class KelSahService
         return $query->paginate($perPage);
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
+    public function create(array $data): KelSah
+    {
+        return KelSah::create($data);
+    }
+
     public function find(string $id): KelSah
     {
         return KelSah::findOrFail($id);
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    public function update(string $id, array $data): KelSah
+    {
+        $record = $this->find($id);
+        $record->update($data);
+
+        return $record;
+    }
+
+    public function delete(string $id): void
+    {
+        $record = $this->find($id);
+        $record->delete();
     }
 }

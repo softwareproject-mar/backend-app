@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreDataJlhKeluargaRequest;
-use App\Http\Requests\UpdateDataJlhKeluargaRequest;
-use App\Http\Resources\DataJlhKeluargaResource;
-use App\Services\DataJlhKeluargaService;
+use App\Http\Requests\StoreDataPenghasilanRequest;
+use App\Http\Requests\UpdateDataPenghasilanRequest;
+use App\Http\Resources\DataPenghasilanResource;
+use App\Services\DataPenghasilanService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class DataJlhKeluargaController extends Controller
+class DataPenghasilanController extends Controller
 {
-    public function __construct(private DataJlhKeluargaService $service)
+    public function __construct(private DataPenghasilanService $service)
     {
     }
 
@@ -23,14 +23,14 @@ class DataJlhKeluargaController extends Controller
 
         $paginator = $this->service->paginate($filters, $perPage);
 
-        return DataJlhKeluargaResource::collection($paginator);
+        return DataPenghasilanResource::collection($paginator);
     }
 
-    public function store(StoreDataJlhKeluargaRequest $request)
+    public function store(StoreDataPenghasilanRequest $request)
     {
         $record = $this->service->create($request->validated());
 
-        return (new DataJlhKeluargaResource($record))
+        return (new DataPenghasilanResource($record))
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }
@@ -39,14 +39,14 @@ class DataJlhKeluargaController extends Controller
     {
         $record = $this->service->find($id);
 
-        return new DataJlhKeluargaResource($record);
+        return new DataPenghasilanResource($record);
     }
 
-    public function update(UpdateDataJlhKeluargaRequest $request, string $id)
+    public function update(UpdateDataPenghasilanRequest $request, string $id)
     {
         $record = $this->service->update($id, $request->validated());
 
-        return new DataJlhKeluargaResource($record);
+        return new DataPenghasilanResource($record);
     }
 
     public function destroy(string $id)

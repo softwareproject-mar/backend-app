@@ -3,34 +3,34 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreDataJlhKeluargaRequest;
-use App\Http\Requests\UpdateDataJlhKeluargaRequest;
-use App\Http\Resources\DataJlhKeluargaResource;
-use App\Services\DataJlhKeluargaService;
+use App\Http\Requests\StoreSekretarisKsRequest;
+use App\Http\Requests\UpdateSekretarisKsRequest;
+use App\Http\Resources\SekretarisKsResource;
+use App\Services\SekretarisKsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class DataJlhKeluargaController extends Controller
+class SekretarisKsController extends Controller
 {
-    public function __construct(private DataJlhKeluargaService $service)
+    public function __construct(private SekretarisKsService $service)
     {
     }
 
     public function index(Request $request)
     {
         $perPage = $request->integer('per_page', 15);
-        $filters = $request->only(['NO_AGT']);
+        $filters = $request->only(['ID_SEKRE', 'NO_AGT', 'NAMA', 'STAT']);
 
         $paginator = $this->service->paginate($filters, $perPage);
 
-        return DataJlhKeluargaResource::collection($paginator);
+        return SekretarisKsResource::collection($paginator);
     }
 
-    public function store(StoreDataJlhKeluargaRequest $request)
+    public function store(StoreSekretarisKsRequest $request)
     {
         $record = $this->service->create($request->validated());
 
-        return (new DataJlhKeluargaResource($record))
+        return (new SekretarisKsResource($record))
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }
@@ -39,14 +39,14 @@ class DataJlhKeluargaController extends Controller
     {
         $record = $this->service->find($id);
 
-        return new DataJlhKeluargaResource($record);
+        return new SekretarisKsResource($record);
     }
 
-    public function update(UpdateDataJlhKeluargaRequest $request, string $id)
+    public function update(UpdateSekretarisKsRequest $request, string $id)
     {
         $record = $this->service->update($id, $request->validated());
 
-        return new DataJlhKeluargaResource($record);
+        return new SekretarisKsResource($record);
     }
 
     public function destroy(string $id)

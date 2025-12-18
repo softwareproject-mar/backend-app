@@ -31,8 +31,33 @@ class AnggotaService
         return $query->paginate($perPage);
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
+    public function create(array $data): Anggota
+    {
+        return Anggota::create($data);
+    }
+
     public function find(string $id): Anggota
     {
         return Anggota::findOrFail($id);
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    public function update(string $id, array $data): Anggota
+    {
+        $record = $this->find($id);
+        $record->update($data);
+
+        return $record;
+    }
+
+    public function delete(string $id): void
+    {
+        $record = $this->find($id);
+        $record->delete();
     }
 }

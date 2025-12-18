@@ -2,23 +2,19 @@
 
 namespace App\Services;
 
-use App\Models\DataLo;
+use App\Models\DataPenghasilan;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-class DataLoService
+class DataPenghasilanService
 {
     /**
-     * Paginate data_lo with optional filters.
+     * Paginate data_penghasilan with optional filters.
      *
      * @param array<string, mixed> $filters
      */
     public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = DataLo::query();
-
-        if (isset($filters['ID_LO'])) {
-            $query->where('ID_LO', $filters['ID_LO']);
-        }
+        $query = DataPenghasilan::query();
 
         if (isset($filters['NO_AGT'])) {
             $query->where('NO_AGT', $filters['NO_AGT']);
@@ -30,20 +26,20 @@ class DataLoService
     /**
      * @param array<string, mixed> $data
      */
-    public function create(array $data): DataLo
+    public function create(array $data): DataPenghasilan
     {
-        return DataLo::create($data);
+        return DataPenghasilan::create($data);
     }
 
-    public function find(string $id): DataLo
+    public function find(string $id): DataPenghasilan
     {
-        return DataLo::findOrFail($id);
+        return DataPenghasilan::findOrFail($id);
     }
 
     /**
      * @param array<string, mixed> $data
      */
-    public function update(string $id, array $data): DataLo
+    public function update(string $id, array $data): DataPenghasilan
     {
         $record = $this->find($id);
         $record->update($data);

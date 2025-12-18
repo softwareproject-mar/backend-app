@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('data_kunjungan', function (Blueprint $table) {
-            $table->integer('NO_URT')->primary();
+            $table->increments('NO_URT');
             $table->string('ID_LO', 12)->nullable();
             $table->string('NO_AGT', 15)->nullable();
             $table->string('ID_KEL_SAH', 12)->nullable();
