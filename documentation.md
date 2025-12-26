@@ -1,5 +1,42 @@
 # Backend API Documentation
 
+**Last Updated:** December 19, 2025  
+**API Version:** 1.0  
+**Framework:** Laravel 12.0 + PHP 8.2
+
+---
+
+## 📋 Table of Contents
+
+1. [Informasi Umum](#informasi-umum)
+2. [Authentication Flow](#authentication-flow)
+   - [Request OTP](#1-request-otp)
+   - [Register with OTP](#2-register-with-otp)
+   - [Login](#3-login)
+   - [Get Current User](#4-get-current-user)
+   - [Logout](#5-logout)
+3. [Protected Resources](#protected-resources)
+   - [Data Kunjungan](#1-data-kunjungan)
+   - [Anggota](#2-anggota)
+   - [Kel Sah](#3-kel-sah-keluarga-sejahtera)
+   - [Data LO](#4-data-lo-lembaga-operasional)
+   - [Data AO](#5-data-ao-anggota-operasional)
+   - [Data Jlh Keluarga](#6-data-jlh-keluarga)
+   - [Ketua KS](#7-ketua-ks)
+   - [Sekretaris KS](#8-sekretaris-ks)
+   - [Data Penghasilan](#9-data-penghasilan)
+   - [Target](#10-target)
+   - [Realisasi](#11-realisasi)
+   - [Data TRS](#12-data-trs)
+   - [Dashboard](#13-dashboard)
+4. [Error Handling](#error-handling)
+5. [Pagination & Filtering](#pagination-and-filtering)
+6. [Tips untuk Frontend](#tips-untuk-frontend-developer)
+7. [Testing Examples](#testing-examples)
+8. [Endpoint Summary](#summary-endpoints)
+
+---
+
 ## Informasi Umum
 
 ### Base URL
@@ -11,15 +48,81 @@ http://127.0.0.1:8000/api
 Semua response menggunakan format JSON dengan struktur yang konsisten menggunakan Laravel API Resources.
 
 ### Authentication
-API menggunakan **Laravel Sanctum** dengan token-based authentication. Token akan expired setelah **120 menit** (2 jam) sejak dibuat.
+API menggunakan **Laravel Sanctum** dengan token-based authentication.
+
+**Token Management:**
+- Token dibuat saat login atau register
+- Token harus disertakan di header `Authorization: Bearer {token}` untuk protected endpoints
+- Token dapat di-revoke dengan endpoint logout
+
+### Database
+- **Database:** MySQL 8.0+ (database: `firebird`)
+- **Naming Convention:** UPPERCASE untuk field database (ID_KS, NO_AGT, TGL_KUN, dll)
 
 ---
 
 ## Authentication Flow
 
-### 1. Register User Baru
+### 1. Request OTP
+
+**Endpoint:** `POST /auth/request-otp`
+
+**Description:** Request OTP code untuk verifikasi email sebelum registrasi.
+
+**Headers:**
+```
+Content-Type: application/json
+Accept: application/json
+```
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Field Validation:**
+- `email`: required, email valid, unique (belum terdaftar)
+
+**Success Response (200 OK):**
+```json
+{
+  "message": "OTP has been sent to your email",
+  "email": "user@example.com",
+  "expires_in": 300
+}
+```
+
+**Error Response (422 Unprocessable Entity):**
+```json
+{
+  "message": "The email has already been taken.",
+  "errors": {
+    "email": ["The email has already been taken."]
+  }
+}
+```
+
+**Error Response (429 Too Many Requests):**
+```json
+{
+  "message": "Too many requests. Please try again later."
+}
+```
+
+**Notes:**
+- OTP akan dikirim ke email (saat ini: `MAIL_MAILER=log`, cek di `storage/logs/laravel.log`)
+- OTP expired dalam 5 menit
+- Rate limit: maksimal request per email dalam periode tertentu
+
+---
+
+### 2. Register with OTP
 
 **Endpoint:** `POST /auth/register`
+
+**Description:** Register user baru dengan OTP verification.
 
 **Headers:**
 ```
@@ -34,15 +137,17 @@ Accept: application/json
   "email": "john@example.com",
   "password": "password123",
   "password_confirmation": "password123",
+  "otp": "123456",
   "role": "user"
 }
 ```
 
 **Field Validation:**
 - `name`: required, string, max 255 karakter
-- `email`: required, email valid, unique di database
-- `password`: required, min 8 karakter, harus sama dengan password_confirmation
-- `password_confirmation`: required
+- `email`: required, email valid
+- `password`: required, min 8 karakter
+- `password_confirmation`: required, harus sama dengan password
+- `otp`: required, string, 6 digit
 - `role`: optional, string (default: "user")
 
 **Success Response (201 Created):**
@@ -54,31 +159,48 @@ Accept: application/json
     "email": "john@example.com",
     "role": "user",
     "is_active": true,
+    "email_verified_at": "2025-12-19T10:30:00.000000Z",
     "last_login_at": null,
-    "created_at": "2025-12-16T10:30:00.000000Z",
-    "updated_at": "2025-12-16T10:30:00.000000Z"
+    "created_at": "2025-12-19T10:30:00.000000Z",
+    "updated_at": "2025-12-19T10:30:00.000000Z"
   },
   "token": "1|abcdefghijklmnopqrstuvwxyz1234567890"
 }
 ```
 
-**Error Response (422 Unprocessable Entity):**
+**Error Response (422 - Invalid OTP):**
 ```json
 {
-  "message": "The email has already been taken.",
+  "message": "Invalid or expired OTP code",
   "errors": {
-    "email": [
-      "The email has already been taken."
-    ]
+    "otp": ["The OTP code is invalid or has expired."]
   }
 }
 ```
 
+**Error Response (422 - Validation Error):**
+```json
+{
+  "message": "The password confirmation does not match.",
+  "errors": {
+    "password": ["The password confirmation does not match."]
+  }
+}
+```
+
+**Flow:**
+1. User request OTP dulu via `/auth/request-otp`
+2. User terima OTP di email
+3. User submit form register dengan OTP
+4. System verify OTP → create user → return token
+
 ---
 
-### 2. Login
+### 3. Login
 
 **Endpoint:** `POST /auth/login`
+
+**Description:** Login dengan email & password untuk mendapatkan token.
 
 **Headers:**
 ```
@@ -107,26 +229,45 @@ Accept: application/json
     "email": "john@example.com",
     "role": "user",
     "is_active": true,
-    "last_login_at": "2025-12-16T10:35:00.000000Z",
-    "created_at": "2025-12-16T10:30:00.000000Z",
-    "updated_at": "2025-12-16T10:35:00.000000Z"
+    "last_login_at": "2025-12-19T10:35:00.000000Z",
+    "created_at": "2025-12-19T10:30:00.000000Z",
+    "updated_at": "2025-12-19T10:35:00.000000Z"
   },
   "token": "2|xyz9876543210abcdefghijklmnopqrstuvw"
 }
 ```
 
-**Error Response (401 Unauthorized):**
+**Error Response (422 - Invalid Credentials):**
 ```json
 {
-  "message": "Invalid credentials"
+  "message": "The provided credentials are incorrect.",
+  "errors": {
+    "email": ["The provided credentials are incorrect."]
+  }
 }
 ```
 
+**Error Response (422 - Account Deactivated):**
+```json
+{
+  "message": "Your account has been deactivated.",
+  "errors": {
+    "email": ["Your account has been deactivated."]
+  }
+}
+```
+
+**Notes:**
+- Field `last_login_at` akan di-update setiap kali login berhasil
+- Jika akun tidak aktif (`is_active = false`), login akan ditolak
+
 ---
 
-### 3. Get Current User Info
+### 4. Get Current User Info
 
 **Endpoint:** `GET /auth/me`
+
+**Description:** Mendapatkan informasi user yang sedang login.
 
 **Headers:**
 ```
@@ -143,9 +284,10 @@ Accept: application/json
     "email": "john@example.com",
     "role": "user",
     "is_active": true,
-    "last_login_at": "2025-12-16T10:35:00.000000Z",
-    "created_at": "2025-12-16T10:30:00.000000Z",
-    "updated_at": "2025-12-16T10:35:00.000000Z"
+    "email_verified_at": "2025-12-19T10:30:00.000000Z",
+    "last_login_at": "2025-12-19T10:35:00.000000Z",
+    "created_at": "2025-12-19T10:30:00.000000Z",
+    "updated_at": "2025-12-19T10:35:00.000000Z"
   }
 }
 ```
@@ -157,11 +299,17 @@ Accept: application/json
 }
 ```
 
+**Notes:**
+- Gunakan endpoint ini untuk validasi token
+- Response berbentuk UserResource dengan wrapper `data`
+
 ---
 
-### 4. Logout
+### 5. Logout
 
 **Endpoint:** `POST /auth/logout`
+
+**Description:** Logout dan revoke current token.
 
 **Headers:**
 ```
@@ -183,6 +331,10 @@ Accept: application/json
 }
 ```
 
+**Notes:**
+- Token yang digunakan akan dihapus dari database
+- User harus login ulang untuk mendapat token baru
+
 ---
 
 ## Protected Resources
@@ -195,9 +347,211 @@ Authorization: Bearer {token}
 
 ---
 
-## 1. Anggota (Members)
+## 1. Data Kunjungan
 
-### Get All Anggota (Paginated)
+### GET /data-kunjungan
+
+**Description:** Get list data kunjungan dengan pagination.
+
+**Headers:**
+```
+Authorization: Bearer {token}
+Accept: application/json
+```
+
+**Query Parameters:**
+- `page` (optional): Nomor halaman (default: 1)
+- `per_page` (optional): Jumlah item per halaman (default: 15)
+- Filter fields (optional):
+  - `ID_LO`: Filter by ID Lembaga Operasional
+  - `NO_AGT`: Filter by Nomor Anggota
+  - `ID_KEL_SAH`: Filter by ID Keluarga Sejahtera
+  - `TGL_KUN`: Filter by Tanggal Kunjungan
+  - `KEGIATAN`: Filter by Kegiatan
+  - `ID_PIC`: Filter by ID PIC
+
+**Example Request:**
+```
+GET /data-kunjungan?page=1&per_page=20&ID_LO=001
+```
+
+**Success Response (200 OK):**
+```json
+{
+  "data": [
+    {
+      "NO_URT": 1,
+      "ID_LO": "001",
+      "NO_AGT": "AGT001",
+      "ID_KEL_SAH": "KS001",
+      "TGL_KUN": "2025-12-19",
+      "KEGIATAN": "Pertemuan Rutin",
+      "ID_PIC": "PIC001",
+      "JLH_PESERTA": 15
+    }
+  ],
+  "links": { "first": "...", "last": "...", "prev": null, "next": "..." },
+  "meta": {
+    "current_page": 1,
+    "from": 1,
+    "last_page": 5,
+    "per_page": 15,
+    "to": 15,
+    "total": 75
+  }
+}
+```
+
+---
+
+### POST /data-kunjungan
+
+**Description:** Create data kunjungan baru.
+
+**Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+Accept: application/json
+```
+
+**Request Body:**
+```json
+{
+  "ID_LO": "001",
+  "NO_AGT": "AGT001",
+  "ID_KEL_SAH": "KS001",
+  "TGL_KUN": "2025-12-19",
+  "KEGIATAN": "Pertemuan Rutin",
+  "ID_PIC": "PIC001",
+  "JLH_PESERTA": 15
+}
+```
+
+**Field Validation:**
+- `ID_LO`: nullable, string, max 12
+- `NO_AGT`: nullable, string, max 15
+- `ID_KEL_SAH`: nullable, string, max 12
+- `TGL_KUN`: nullable, string, max 50
+- `KEGIATAN`: nullable, string, max 255
+- `ID_PIC`: nullable, string, max 12
+- `JLH_PESERTA`: nullable, integer
+
+**Success Response (201 Created):**
+```json
+{
+  "data": {
+    "NO_URT": 10,
+    "ID_LO": "001",
+    "NO_AGT": "AGT001",
+    "ID_KEL_SAH": "KS001",
+    "TGL_KUN": "2025-12-19",
+    "KEGIATAN": "Pertemuan Rutin",
+    "ID_PIC": "PIC001",
+    "JLH_PESERTA": 15
+  }
+}
+```
+
+---
+
+### GET /data-kunjungan/{NO_URT}
+
+**Description:** Get detail data kunjungan by ID.
+
+**Headers:**
+```
+Authorization: Bearer {token}
+Accept: application/json
+```
+
+**Success Response (200 OK):**
+```json
+{
+  "data": {
+    "NO_URT": 1,
+    "ID_LO": "001",
+    "NO_AGT": "AGT001",
+    "ID_KEL_SAH": "KS001",
+    "TGL_KUN": "2025-12-19",
+    "KEGIATAN": "Pertemuan Rutin",
+    "ID_PIC": "PIC001",
+    "JLH_PESERTA": 15
+  }
+}
+```
+
+**Error Response (404 Not Found):**
+```json
+{
+  "message": "Resource not found"
+}
+```
+
+---
+
+### PUT /data-kunjungan/{NO_URT}
+
+**Description:** Update data kunjungan existing.
+
+**Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+Accept: application/json
+```
+
+**Request Body:** (semua field optional untuk partial update)
+```json
+{
+  "KEGIATAN": "Pertemuan Luar Biasa",
+  "JLH_PESERTA": 20
+}
+```
+
+**Success Response (200 OK):**
+```json
+{
+  "data": {
+    "NO_URT": 1,
+    "ID_LO": "001",
+    "NO_AGT": "AGT001",
+    "ID_KEL_SAH": "KS001",
+    "TGL_KUN": "2025-12-19",
+    "KEGIATAN": "Pertemuan Luar Biasa",
+    "ID_PIC": "PIC001",
+    "JLH_PESERTA": 20
+  }
+}
+```
+
+---
+
+### DELETE /data-kunjungan/{NO_URT}
+
+**Description:** Delete data kunjungan.
+
+**Headers:**
+```
+Authorization: Bearer {token}
+Accept: application/json
+```
+
+**Success Response (204 No Content):**
+(no body)
+
+**Error Response (404 Not Found):**
+```json
+{
+  "message": "Resource not found"
+}
+```
+
+---
+
+## 2. Anggota (Members)
+
+### GET /anggota
 
 **Endpoint:** `GET /anggota`
 
@@ -1056,6 +1410,23 @@ Untuk pertanyaan atau issue terkait API, silakan hubungi tim development.
 
 ---
 
-**Last Updated:** December 16, 2025  
+**Last Updated:** December 19, 2025  
 **API Version:** 1.0  
-**Framework:** Laravel 12.0
+**Framework:** Laravel 12.0 + PHP 8.2
+
+---
+
+## 📢 DOCUMENTATION UPDATE
+
+✨ **Dokumentasi lengkap untuk frontend telah dibuat:** [`API_DOCUMENTATION_COMPLETE.md`](./API_DOCUMENTATION_COMPLETE.md)
+
+**Yang ada di dokumentasi baru:**
+- ✅ **63 endpoints lengkap** (3 public + 60 protected)
+- ✅ **OTP-based authentication** flow detail
+- ✅ **Frontend integration guide** dengan Axios setup & React Hooks examples
+- ✅ **Complete field definitions** untuk semua 13+ tables
+- ✅ **Error handling patterns** & validation rules
+- ✅ **Postman/cURL examples** ready to use
+- ✅ **Composite key handling** (Target, Realisasi)
+
+File ini (`documentation.md`) tetap ada untuk reference legacy.

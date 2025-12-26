@@ -1,11 +1,78 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Backend API - Manajemen Data Kunjungan
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Laravel 12.0 + PHP 8.2 + MySQL**
+
+---
+
+## 📚 Documentation for Frontend Developers
+
+### 👉 **Start Here:** [`FRONTEND_QUICKSTART.md`](./FRONTEND_QUICKSTART.md)
+
+**Quick Links:**
+- 📖 [Complete API Documentation](./API_DOCUMENTATION_COMPLETE.md) - **63 endpoints dengan examples lengkap**
+- 🚀 [Frontend Quick Start](./FRONTEND_QUICKSTART.md) - **5-minute integration guide**
+- 📋 [Legacy Documentation](./documentation.md)
+- 📦 [Postman Collection](./postman_collection.json)
+
+---
+
+## 🎯 What's Available
+
+**Authentication:**
+- OTP-based registration
+- Token-based authentication (Laravel Sanctum)
+
+**Resources (Full CRUD):**
+- Data Kunjungan
+- Anggota (Members)
+- Kel Sah (Keluarga Sejahtera)
+- Data LO, Data AO
+- Data Jlh Keluarga
+- Ketua KS, Sekretaris KS
+- Data Penghasilan
+- Target (composite key)
+
+**Read-Only Resources:**
+- Realisasi (transactional)
+- Data TRS (transactional)
+- Dashboard (JOIN Target + Realisasi)
+
+**Total: 63 endpoints**
+
+---
+
+## ⚡ Quick Setup
+
+```bash
+# Clone & install
+git clone <repo>
+cd backend-app
+composer install
+
+# Setup environment
+cp .env.example .env
+php artisan key:generate
+
+# Database
+php artisan migrate
+
+# Run
+php artisan serve
+# API available at: http://127.0.0.1:8000/api
+```
+
+---
+
+## 📝 Project Documentation
+
+- [PROJECT_OVERVIEW.md](./PROJECT_OVERVIEW.md) - Gambaran besar project
+- [PROJECT_RULES.md](./PROJECT_RULES.md) - Aturan coding & arsitektur
+- [REQUIREMENTS.md](./REQUIREMENTS.md) - Kebutuhan sistem
+- [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) - Status implementasi
+
+---
+
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 ## About Laravel
 
