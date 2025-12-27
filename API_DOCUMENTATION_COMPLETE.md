@@ -161,7 +161,110 @@ POST /auth/login
 
 ---
 
-### 4. Get Current User
+### 4. Forgot Password (Request OTP)
+
+```http
+POST /auth/forgot-password
+```
+
+**Purpose:** Kirim OTP reset password ke email terdaftar
+
+**Request:**
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Response (200):**
+```json
+{
+  "message": "OTP has been sent to your email",
+  "email": "user@example.com",
+  "expires_in": 300
+}
+```
+
+**Validation:**
+- `email`: required | email | exists:users,email
+
+**Notes:**
+- OTP expired dalam 5 menit (lihat `OTP_EXPIRY_MINUTES`)
+- Saat ini `MAIL_MAILER=log`, cek OTP di `storage/logs/laravel.log`
+- Rate limit per email berlaku
+
+---
+
+### 5. Verify Reset OTP
+
+```http
+POST /auth/verify-reset-otp
+```
+
+**Purpose:** Validasi OTP reset password dan keluarkan `reset_token`
+
+**Request:**
+```json
+{
+  "email": "user@example.com",
+  "otp": "123456"
+}
+```
+
+**Response (200):**
+```json
+{
+  "message": "OTP verified. Use the reset token to update your password.",
+  "reset_token": "reset-token-string"
+}
+```
+
+**Validation:**
+- `email`: required | email | exists:users,email
+- `otp`: required | string | size:6
+
+**Notes:**
+- `reset_token` berlaku 60 menit (config `PASSWORD_RESET_TTL_MINUTES`)
+- OTP akan dihapus setelah berhasil diverifikasi
+
+---
+
+### 6. Reset Password
+
+```http
+POST /auth/reset-password
+```
+
+**Purpose:** Ganti password menggunakan `reset_token`
+
+**Request:**
+```json
+{
+  "email": "user@example.com",
+  "reset_token": "reset-token-string",
+  "password": "newpassword123",
+  "password_confirmation": "newpassword123"
+}
+```
+
+**Response (200):**
+```json
+{
+  "message": "Password has been reset successfully."
+}
+```
+
+**Validation:**
+- `email`: required | email | exists:users,email
+- `reset_token`: required | string
+- `password`: required | min:8 | confirmed
+
+**Error Cases:**
+- Invalid/expired reset token ? 422
+
+---
+
+### 7. Get Current User
 
 ```http
 GET /auth/me
@@ -191,7 +294,7 @@ Authorization: Bearer {token}
 
 ---
 
-### 5. Logout
+### 8. Logout
 
 ```http
 POST /auth/logout
@@ -212,7 +315,6 @@ Authorization: Bearer {token}
 ```
 
 ---
-
 ## 🔒 Protected Resources (CRUD)
 
 **⚠️ Semua endpoint di bawah memerlukan header:**

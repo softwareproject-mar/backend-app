@@ -20,7 +20,8 @@ class SendOtpEmailJob implements ShouldQueue
      */
     public function __construct(
         public string $email,
-        public string $otp
+        public string $otp,
+        public string $purpose = 'register'
     ) {
     }
 
@@ -30,14 +31,16 @@ class SendOtpEmailJob implements ShouldQueue
     public function handle(): void
     {
         try {
-            Mail::to($this->email)->send(new SendOtpMail($this->otp, $this->email));
+            Mail::to($this->email)->send(new SendOtpMail($this->otp, $this->email, $this->purpose));
             
             Log::info('OTP email sent successfully', [
                 'email' => $this->email,
+                'purpose' => $this->purpose,
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to send OTP email', [
                 'email' => $this->email,
+                'purpose' => $this->purpose,
                 'error' => $e->getMessage(),
             ]);
 

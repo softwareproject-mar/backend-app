@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DataAoController;
 use App\Http\Controllers\Api\DataJlhKeluargaController;
 use App\Http\Controllers\Api\DataKunjunganController;
+use App\Http\Controllers\Api\DataPengelolaController;
 use App\Http\Controllers\Api\DataLoController;
 use App\Http\Controllers\Api\DataPenghasilanController;
 use App\Http\Controllers\Api\DataTrsController;
@@ -65,6 +66,9 @@ Route::post('/debug-ketua-ks', function(Request $request) {
 Route::post('/auth/request-otp', [AuthController::class, 'requestOtp']);
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/auth/verify-reset-otp', [AuthController::class, 'verifyResetOtp']);
+Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -81,6 +85,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('data-lo', DataLoController::class);
     Route::apiResource('data-ao', DataAoController::class);
     Route::apiResource('data-jlh-keluarga', DataJlhKeluargaController::class);
+    Route::apiResource('data-pengelola', DataPengelolaController::class);
     Route::apiResource('ketua-ks', KetuaKsController::class);
     Route::apiResource('sekretaris-ks', SekretarisKsController::class);
     Route::apiResource('data-penghasilan', DataPenghasilanController::class);

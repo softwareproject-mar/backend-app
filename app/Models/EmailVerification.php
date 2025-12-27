@@ -13,6 +13,7 @@ class EmailVerification extends Model
      */
     protected $fillable = [
         'email',
+        'purpose',
         'otp_code',
         'expires_at',
         'attempts',
@@ -47,6 +48,14 @@ class EmailVerification extends Model
     public function scopeForEmail($query, string $email)
     {
         return $query->where('email', $email);
+    }
+
+    /**
+     * Scope to filter by purpose.
+     */
+    public function scopeForPurpose($query, string $purpose)
+    {
+        return $query->where('purpose', $purpose);
     }
 
     /**

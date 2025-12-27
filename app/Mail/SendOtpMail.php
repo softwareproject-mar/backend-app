@@ -17,7 +17,8 @@ class SendOtpMail extends Mailable
      */
     public function __construct(
         public string $otp,
-        public string $email
+        public string $email,
+        public string $purpose = 'register'
     ) {
     }
 
@@ -26,8 +27,12 @@ class SendOtpMail extends Mailable
      */
     public function envelope(): Envelope
     {
+        $subjectPrefix = $this->purpose === 'password_reset'
+            ? 'Password Reset OTP'
+            : 'Your OTP Code';
+
         return new Envelope(
-            subject: 'Your OTP Code - ' . config('app.name'),
+            subject: $subjectPrefix . ' - ' . config('app.name'),
         );
     }
 

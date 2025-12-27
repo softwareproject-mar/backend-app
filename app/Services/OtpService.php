@@ -18,15 +18,18 @@ class OtpService
     /**
      * Store OTP in database with expiry time.
      */
-    public function storeOtp(string $email, string $otp): EmailVerification
+    public function storeOtp(string $email, string $otp, string $purpose = 'register'): EmailVerification
     {
-        // Delete any existing OTP for this email
-        EmailVerification::where('email', $email)->delete();
+        // Delete any existing OTP for this email & purpose
+        EmailVerification::where('email', $email)
+            ->where('purpose', $purpose)
+            ->delete();
 
         $expiryMinutes = config('otp.expiry_minutes', 5);
 
         return EmailVerification::create([
             'email' => $email,
+            'purpose' => $purpose,
             'otp_code' => $otp,
             'expires_at' => now()->addMinutes($expiryMinutes),
             'attempts' => 0,
@@ -36,9 +39,10 @@ class OtpService
     /**
      * Verify OTP code for given email.
      */
-    public function verifyOtp(string $email, string $otp): bool
+    public function verifyOtp(string $email, string $otp, string $purpose = 'register'): bool
     {
         $verification = EmailVerification::forEmail($email)
+            ->forPurpose($purpose)
             ->notExpired()
             ->whereNull('verified_at')
             ->latest()

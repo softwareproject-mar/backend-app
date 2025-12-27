@@ -13,8 +13,11 @@
    - [Request OTP](#1-request-otp)
    - [Register with OTP](#2-register-with-otp)
    - [Login](#3-login)
-   - [Get Current User](#4-get-current-user)
-   - [Logout](#5-logout)
+   - [Forgot Password (Request OTP)](#4-forgot-password-request-otp)
+   - [Verify Reset OTP](#5-verify-reset-otp)
+   - [Reset Password](#6-reset-password)
+   - [Get Current User](#7-get-current-user-info)
+   - [Logout](#8-logout)
 3. [Protected Resources](#protected-resources)
    - [Data Kunjungan](#1-data-kunjungan)
    - [Anggota](#2-anggota)
@@ -263,7 +266,150 @@ Accept: application/json
 
 ---
 
-### 4. Get Current User Info
+### 4. Forgot Password (Request OTP)
+
+**Endpoint:** `POST /auth/forgot-password`
+
+**Description:** Kirim OTP reset password ke email terdaftar.
+
+**Headers:**
+```
+Content-Type: application/json
+Accept: application/json
+```
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Field Validation:**
+- `email`: required, email valid, exists di tabel users
+
+**Success Response (200 OK):**
+```json
+{
+  "message": "OTP has been sent to your email",
+  "email": "user@example.com",
+  "expires_in": 300
+}
+```
+
+**Error Response (429 Too Many Requests):**
+```json
+{
+  "message": "Too many requests. Please try again later."
+}
+```
+
+**Notes:**
+- OTP expired dalam 5 menit (`OTP_EXPIRY_MINUTES`)
+- Mailer saat ini `log`, cek `storage/logs/laravel.log`
+- Rate limit per email berlaku
+
+---
+
+### 5. Verify Reset OTP
+
+**Endpoint:** `POST /auth/verify-reset-otp`
+
+**Description:** Validasi OTP reset password dan keluarkan `reset_token`.
+
+**Headers:**
+```
+Content-Type: application/json
+Accept: application/json
+```
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "otp": "123456"
+}
+```
+
+**Field Validation:**
+- `email`: required, email valid, exists di tabel users
+- `otp`: required, string, size 6
+
+**Success Response (200 OK):**
+```json
+{
+  "message": "OTP verified. Use the reset token to update your password.",
+  "reset_token": "reset-token-string"
+}
+```
+
+**Error Response (422 - Invalid/Expired OTP):**
+```json
+{
+  "message": "Invalid or expired OTP code",
+  "errors": {
+    "otp": ["The OTP code is invalid or has expired."]
+  }
+}
+```
+
+**Notes:**
+- `reset_token` berlaku 60 menit (config `PASSWORD_RESET_TTL_MINUTES`)
+- OTP akan dihapus setelah berhasil diverifikasi
+
+---
+
+### 6. Reset Password
+
+**Endpoint:** `POST /auth/reset-password`
+
+**Description:** Ganti password menggunakan `reset_token`.
+
+**Headers:**
+```
+Content-Type: application/json
+Accept: application/json
+```
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "reset_token": "reset-token-string",
+  "password": "newpassword123",
+  "password_confirmation": "newpassword123"
+}
+```
+
+**Field Validation:**
+- `email`: required, email valid, exists di tabel users
+- `reset_token`: required
+- `password`: required, min:8, confirmed
+
+**Success Response (200 OK):**
+```json
+{
+  "message": "Password has been reset successfully."
+}
+```
+
+**Error Response (422 - Invalid/Expired Token):**
+```json
+{
+  "message": "Invalid or expired reset token",
+  "errors": {
+    "reset_token": ["The reset token is invalid or has expired."]
+  }
+}
+```
+
+**Notes:**
+- Token akan di-revoke setelah sukses
+- Gunakan token terbaru jika request ulang OTP
+
+---
+
+### 7. Get Current User Info
 
 **Endpoint:** `GET /auth/me`
 
@@ -305,7 +451,7 @@ Accept: application/json
 
 ---
 
-### 5. Logout
+### 8. Logout
 
 **Endpoint:** `POST /auth/logout`
 
