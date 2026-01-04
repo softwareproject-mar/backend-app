@@ -12,9 +12,7 @@ use App\Http\Controllers\Api\DataPenghasilanController;
 use App\Http\Controllers\Api\DataTrsController;
 use App\Http\Controllers\Api\KelSahController;
 use App\Http\Controllers\Api\KetuaKsController;
-use App\Http\Controllers\Api\RealisasiController;
 use App\Http\Controllers\Api\SekretarisKsController;
-use App\Http\Controllers\Api\TargetController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -92,18 +90,4 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Data TRS (read only)
     Route::apiResource('data-trs', DataTrsController::class)->only(['index', 'show']);
-
-    // Target (full CRUD with composite key)
-    Route::get('/target', [TargetController::class, 'index']);
-    Route::post('/target', [TargetController::class, 'store']);
-    Route::get('/target/{idKs}/{tglTgt}', [TargetController::class, 'show']);
-    Route::put('/target/{idKs}/{tglTgt}', [TargetController::class, 'update']);
-    Route::delete('/target/{idKs}/{tglTgt}', [TargetController::class, 'destroy']);
-
-    // Realisasi (read only with composite key)
-    Route::get('/realisasi', [RealisasiController::class, 'index']);
-    Route::get('/realisasi/{idKs}/{tglTgt}', [RealisasiController::class, 'show']);
-
-    // Dashboard (read only - join Target + Realisasi)
-    Route::get('/dashboard', [DashboardController::class, 'index']);
 });
