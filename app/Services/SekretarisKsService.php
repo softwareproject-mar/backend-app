@@ -7,6 +7,10 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class SekretarisKsService
 {
+    public function __construct(
+        private IdGeneratorService $idGenerator
+    ) {
+    }
     /**
      * Paginate sekre_ks with optional filters.
      *
@@ -32,6 +36,10 @@ class SekretarisKsService
      */
     public function create(array $data): SekretarisKs
     {
+        if (! isset($data['ID_SEKRE']) || empty($data['ID_SEKRE'])) {
+            $data['ID_SEKRE'] = $this->idGenerator->generate('sekre-ks');
+        }
+
         return SekretarisKs::create($data);
     }
 

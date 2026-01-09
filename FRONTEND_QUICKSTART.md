@@ -10,6 +10,7 @@
 
 **Berisi:**
 - ✅ **63 endpoints** dengan detail lengkap
+- ✅ **🆔 Auto-Generate ID Feature** untuk 6 master entities ⭐ **NEW**
 - ✅ **Authentication flow** (OTP-based registration + login)
 - ✅ **Request/Response examples** untuk setiap endpoint
 - ✅ **Validation rules** semua field
@@ -25,7 +26,23 @@
 
 ---
 
-### 2. [`documentation.md`](./documentation.md)
+### 2. [`FRONTEND_AUTO_GENERATE_ID_GUIDE.md`](./FRONTEND_AUTO_GENERATE_ID_GUIDE.md) ⭐ **NEW**
+
+**Panduan khusus untuk Auto-Generate ID Feature.**
+
+**Berisi:**
+- ✅ ID format specification (12 digit: 016005XNNNNN)
+- ✅ Affected entities (Ketua KS, Kel Sah, Data LO, Sekre KS, Data AO, Data Pengelola)
+- ✅ API usage examples (auto-generate vs manual ID)
+- ✅ JavaScript validation functions
+- ✅ Error handling & troubleshooting
+- ✅ Migration guide untuk update existing code
+
+**👉 Wajib baca jika menggunakan master data entities!**
+
+---
+
+### 3. [`documentation.md`](./documentation.md)
 
 Dokumentasi legacy yang masih dipertahankan untuk reference.
 

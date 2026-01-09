@@ -17,7 +17,7 @@ class StoreDataLoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'ID_LO' => ['required', 'string', 'max:12'],
+            'ID_LO' => ['nullable', 'string', 'size:12', new \App\Rules\ValidIdFormat('data-lo'), 'unique:data_lo,ID_LO'],
             'NO_AGT' => ['nullable', 'string', 'max:15'],
             'ID_TP' => ['nullable', 'string', 'max:12'],
             'NAMA' => ['nullable', 'string', 'max:255'],

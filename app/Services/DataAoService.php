@@ -7,6 +7,10 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class DataAoService
 {
+    public function __construct(
+        private IdGeneratorService $idGenerator
+    ) {
+    }
     /**
      * Paginate data_ao with optional filters.
      *
@@ -32,6 +36,10 @@ class DataAoService
      */
     public function create(array $data): DataAo
     {
+        if (! isset($data['ID_AO']) || empty($data['ID_AO'])) {
+            $data['ID_AO'] = $this->idGenerator->generate('data-ao');
+        }
+
         return DataAo::create($data);
     }
 

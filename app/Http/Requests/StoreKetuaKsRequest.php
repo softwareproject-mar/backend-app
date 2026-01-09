@@ -17,7 +17,7 @@ class StoreKetuaKsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'ID_KET' => ['required', 'string', 'max:12'],
+            'ID_KET' => ['nullable', 'string', 'size:12', new \App\Rules\ValidIdFormat('ketua-ks'), 'unique:ketua_ks,ID_KET'],
             'NO_AGT' => ['required', 'string', 'max:15'],
             'NAMA' => ['nullable', 'string', 'max:50'],
             'STAT' => ['nullable', 'string', 'max:50'],

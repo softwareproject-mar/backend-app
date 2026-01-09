@@ -17,7 +17,7 @@ class StoreSekretarisKsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'ID_SEKRE' => ['required', 'string', 'max:12'],
+            'ID_SEKRE' => ['nullable', 'string', 'size:12', new \App\Rules\ValidIdFormat('sekre-ks'), 'unique:sekre_ks,ID_SEKRE'],
             'NO_AGT' => ['required', 'string', 'max:15'],
             'NAMA' => ['nullable', 'string', 'max:50'],
             'STAT' => ['nullable', 'string', 'max:50'],

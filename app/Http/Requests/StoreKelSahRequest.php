@@ -17,7 +17,7 @@ class StoreKelSahRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'ID_KEL' => ['required', 'string', 'max:12'],
+            'ID_KEL' => ['nullable', 'string', 'size:12', new \App\Rules\ValidIdFormat('kel-sah'), 'unique:kel_sah,ID_KEL'],
             'NAMA_KEL' => ['nullable', 'string', 'max:255'],
             'ID_KETUA' => ['nullable', 'string', 'max:12'],
             'ID_SEK' => ['nullable', 'string', 'max:12'],

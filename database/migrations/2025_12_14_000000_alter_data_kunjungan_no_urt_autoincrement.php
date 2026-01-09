@@ -10,6 +10,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip for SQLite (not supported)
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
         DB::statement('ALTER TABLE data_kunjungan MODIFY NO_URT INT UNSIGNED NOT NULL AUTO_INCREMENT;');
     }
 
@@ -18,6 +23,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Skip for SQLite (not supported)
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
         DB::statement('ALTER TABLE data_kunjungan MODIFY NO_URT INT UNSIGNED NOT NULL;');
     }
 };

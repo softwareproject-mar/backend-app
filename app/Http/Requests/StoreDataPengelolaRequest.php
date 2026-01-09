@@ -17,7 +17,7 @@ class StoreDataPengelolaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'ID_PENG' => ['required', 'string', 'max:12'],
+            'ID_PENG' => ['nullable', 'string', 'size:12', new \App\Rules\ValidIdFormat('data-pengelola'), 'unique:data_pengelola,ID_PENG'],
             'NO_AGT' => ['nullable', 'string', 'max:15'],
             'NO_SK' => ['nullable', 'integer'],
         ];

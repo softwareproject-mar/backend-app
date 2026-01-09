@@ -7,6 +7,10 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class KelSahService
 {
+    public function __construct(
+        private IdGeneratorService $idGenerator
+    ) {
+    }
     /**
      * Paginate kel_sah with optional filters.
      *
@@ -36,6 +40,10 @@ class KelSahService
      */
     public function create(array $data): KelSah
     {
+        if (! isset($data['ID_KEL']) || empty($data['ID_KEL'])) {
+            $data['ID_KEL'] = $this->idGenerator->generate('kel-sah');
+        }
+
         return KelSah::create($data);
     }
 

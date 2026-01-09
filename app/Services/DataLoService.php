@@ -7,6 +7,10 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class DataLoService
 {
+    public function __construct(
+        private IdGeneratorService $idGenerator
+    ) {
+    }
     /**
      * Paginate data_lo with optional filters.
      *
@@ -32,6 +36,10 @@ class DataLoService
      */
     public function create(array $data): DataLo
     {
+        if (! isset($data['ID_LO']) || empty($data['ID_LO'])) {
+            $data['ID_LO'] = $this->idGenerator->generate('data-lo');
+        }
+
         return DataLo::create($data);
     }
 

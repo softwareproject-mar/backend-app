@@ -17,7 +17,7 @@ class StoreDataAoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'ID_AO' => ['required', 'string', 'max:12'],
+            'ID_AO' => ['nullable', 'string', 'size:12', new \App\Rules\ValidIdFormat('data-ao'), 'unique:data_ao,ID_AO'],
             'NO_AGT' => ['nullable', 'string', 'max:15'],
             'NAMA' => ['nullable', 'string', 'max:255'],
             'STAT' => ['nullable', 'string', 'max:50'],

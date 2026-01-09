@@ -7,6 +7,10 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class DataPengelolaService
 {
+    public function __construct(
+        private IdGeneratorService $idGenerator
+    ) {
+    }
     /**
      * Paginate data_pengelola with optional filters.
      *
@@ -32,6 +36,10 @@ class DataPengelolaService
      */
     public function create(array $data): DataPengelola
     {
+        if (! isset($data['ID_PENG']) || empty($data['ID_PENG'])) {
+            $data['ID_PENG'] = $this->idGenerator->generate('data-pengelola');
+        }
+
         return DataPengelola::create($data);
     }
 
