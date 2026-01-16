@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use App\Models\SekretarisKs;
+use App\Traits\LogsActivity;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class SekretarisKsService
 {
+    use LogsActivity;
     public function __construct(
         private IdGeneratorService $idGenerator
     ) {
@@ -40,7 +42,14 @@ class SekretarisKsService
             $data['ID_SEKRE'] = $this->idGenerator->generate('sekre-ks');
         }
 
-        return SekretarisKs::create($data);
+        return $this->performWithLog('create', function() use ($data) {
+            return SekretarisKs::create($data);
+        }, [
+            'resource_type' => 'sekretaris_ks',
+            'resource_id' => $data['ID_SEKRE'] ?? null,
+            'description' => 'Menambahkan sekretaris KS: ' . ($data['NAMA'] ?? 'Unknown'),
+            'new_data' => $data,
+        ]);
     }
 
     public function find(string $id): SekretarisKs
@@ -53,15 +62,31 @@ class SekretarisKsService
      */
     public function update(string $id, array $data): SekretarisKs
     {
-        $record = $this->find($id);
-        $record->update($data);
-
-        return $record;
+        $old = $this->find($id);
+        
+        return $this->performWithLog('update', function() use ($old, $data) {
+            $old->update($data);
+            return $old->fresh();
+        }, [
+            'resource_type' => 'sekretaris_ks',
+            'resource_id' => $id,
+            'description' => 'Mengupdate sekretaris KS: ' . ($old->NAMA ?? $id),
+            'old_data' => $old->toArray(),
+            'new_data' => $data,
+        ]);
     }
 
     public function delete(string $id): void
     {
         $record = $this->find($id);
-        $record->delete();
+        
+        $this->performWithLog('delete', function() use ($record) {
+            $record->delete();
+        }, [
+            'resource_type' => 'sekretaris_ks',
+            'resource_id' => $id,
+            'description' => 'Menghapus sekretaris KS: ' . ($record->NAMA ?? $id),
+            'old_data' => $record->toArray(),
+        ]);
     }
 }

@@ -3,11 +3,13 @@
 namespace App\Services;
 
 use App\Models\DataKunjungan;
+use App\Traits\LogsActivity;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class DataKunjunganService
 {
+    use LogsActivity;
     /**
      * Paginate data kunjungan with optional filters.
      *
@@ -40,7 +42,14 @@ class DataKunjunganService
      */
     public function create(array $data): DataKunjungan
     {
-        return DataKunjungan::create($data);
+        return $this->performWithLog('create', function() use ($data) {
+            return DataKunjungan::create($data);
+        }, [
+            'resource_type' => 'data_kunjungan',
+            'resource_id' => null,
+            'description' => 'Menambahkan data kunjungan: ' . ($data['ID_KEL_SAH'] ?? 'Unknown'),
+            'new_data' => $data,
+        ]);
     }
 
     public function find(int $id): DataKunjungan
@@ -53,17 +62,31 @@ class DataKunjunganService
      */
     public function update(int $id, array $data): DataKunjungan
     {
-        $record = $this->find($id);
+        $old = $this->find($id);
 
-        $record->update($data);
-
-        return $record;
+        return $this->performWithLog('update', function() use ($old, $data) {
+            $old->update($data);
+            return $old->fresh();
+        }, [
+            'resource_type' => 'data_kunjungan',
+            'resource_id' => (string) $id,
+            'description' => 'Mengupdate data kunjungan: ' . ($old->ID_KEL_SAH ?? $id),
+            'old_data' => $old->toArray(),
+            'new_data' => $data,
+        ]);
     }
 
     public function delete(int $id): void
     {
         $record = $this->find($id);
 
-        $record->delete();
+        $this->performWithLog('delete', function() use ($record) {
+            $record->delete();
+        }, [
+            'resource_type' => 'data_kunjungan',
+            'resource_id' => (string) $record->NO_URT,
+            'description' => 'Menghapus data kunjungan: ' . ($record->ID_KEL_SAH ?? $record->NO_URT),
+            'old_data' => $record->toArray(),
+        ]);
     }
 }

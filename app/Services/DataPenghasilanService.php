@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use App\Models\DataPenghasilan;
+use App\Traits\LogsActivity;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class DataPenghasilanService
 {
+    use LogsActivity;
     /**
      * Paginate data_penghasilan with optional filters.
      *
@@ -28,7 +30,14 @@ class DataPenghasilanService
      */
     public function create(array $data): DataPenghasilan
     {
-        return DataPenghasilan::create($data);
+        return $this->performWithLog('create', function() use ($data) {
+            return DataPenghasilan::create($data);
+        }, [
+            'resource_type' => 'data_penghasilan',
+            'resource_id' => $data['NO_AGT'] ?? null,
+            'description' => 'Menambahkan data penghasilan: ' . ($data['NO_AGT'] ?? 'Unknown'),
+            'new_data' => $data,
+        ]);
     }
 
     public function find(string $id): DataPenghasilan
@@ -41,15 +50,31 @@ class DataPenghasilanService
      */
     public function update(string $id, array $data): DataPenghasilan
     {
-        $record = $this->find($id);
-        $record->update($data);
-
-        return $record;
+        $old = $this->find($id);
+        
+        return $this->performWithLog('update', function() use ($old, $data) {
+            $old->update($data);
+            return $old->fresh();
+        }, [
+            'resource_type' => 'data_penghasilan',
+            'resource_id' => $id,
+            'description' => 'Mengupdate data penghasilan: ' . $id,
+            'old_data' => $old->toArray(),
+            'new_data' => $data,
+        ]);
     }
 
     public function delete(string $id): void
     {
         $record = $this->find($id);
-        $record->delete();
+        
+        $this->performWithLog('delete', function() use ($record) {
+            $record->delete();
+        }, [
+            'resource_type' => 'data_penghasilan',
+            'resource_id' => $id,
+            'description' => 'Menghapus data penghasilan: ' . $id,
+            'old_data' => $record->toArray(),
+        ]);
     }
 }

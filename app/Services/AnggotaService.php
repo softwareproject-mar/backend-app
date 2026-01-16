@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use App\Models\Anggota;
+use App\Traits\LogsActivity;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class AnggotaService
 {
+    use LogsActivity;
     /**
      * Paginate anggota with optional filters.
      *
@@ -36,7 +38,14 @@ class AnggotaService
      */
     public function create(array $data): Anggota
     {
-        return Anggota::create($data);
+        return $this->performWithLog('create', function() use ($data) {
+            return Anggota::create($data);
+        }, [
+            'resource_type' => 'anggota',
+            'resource_id' => $data['NO_AGT'] ?? null,
+            'description' => 'Menambahkan anggota: ' . ($data['NAMA'] ?? 'Unknown'),
+            'new_data' => $data,
+        ]);
     }
 
     public function find(string $id): Anggota
@@ -49,15 +58,31 @@ class AnggotaService
      */
     public function update(string $id, array $data): Anggota
     {
-        $record = $this->find($id);
-        $record->update($data);
-
-        return $record;
+        $old = $this->find($id);
+        
+        return $this->performWithLog('update', function() use ($old, $data) {
+            $old->update($data);
+            return $old->fresh();
+        }, [
+            'resource_type' => 'anggota',
+            'resource_id' => $id,
+            'description' => 'Mengupdate anggota: ' . ($old->NAMA ?? $id),
+            'old_data' => $old->toArray(),
+            'new_data' => $data,
+        ]);
     }
 
     public function delete(string $id): void
     {
         $record = $this->find($id);
-        $record->delete();
+        
+        $this->performWithLog('delete', function() use ($record) {
+            $record->delete();
+        }, [
+            'resource_type' => 'anggota',
+            'resource_id' => $id,
+            'description' => 'Menghapus anggota: ' . ($record->NAMA ?? $id),
+            'old_data' => $record->toArray(),
+        ]);
     }
 }

@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use App\Models\DataLo;
+use App\Traits\LogsActivity;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class DataLoService
 {
+    use LogsActivity;
     public function __construct(
         private IdGeneratorService $idGenerator
     ) {
@@ -40,7 +42,14 @@ class DataLoService
             $data['ID_LO'] = $this->idGenerator->generate('data-lo');
         }
 
-        return DataLo::create($data);
+        return $this->performWithLog('create', function() use ($data) {
+            return DataLo::create($data);
+        }, [
+            'resource_type' => 'data_lo',
+            'resource_id' => $data['ID_LO'] ?? null,
+            'description' => 'Menambahkan data LO: ' . ($data['ID_LO'] ?? 'Unknown'),
+            'new_data' => $data,
+        ]);
     }
 
     public function find(string $id): DataLo
@@ -53,15 +62,31 @@ class DataLoService
      */
     public function update(string $id, array $data): DataLo
     {
-        $record = $this->find($id);
-        $record->update($data);
-
-        return $record;
+        $old = $this->find($id);
+        
+        return $this->performWithLog('update', function() use ($old, $data) {
+            $old->update($data);
+            return $old->fresh();
+        }, [
+            'resource_type' => 'data_lo',
+            'resource_id' => $id,
+            'description' => 'Mengupdate data LO: ' . $id,
+            'old_data' => $old->toArray(),
+            'new_data' => $data,
+        ]);
     }
 
     public function delete(string $id): void
     {
         $record = $this->find($id);
-        $record->delete();
+        
+        $this->performWithLog('delete', function() use ($record) {
+            $record->delete();
+        }, [
+            'resource_type' => 'data_lo',
+            'resource_id' => $id,
+            'description' => 'Menghapus data LO: ' . $id,
+            'old_data' => $record->toArray(),
+        ]);
     }
 }

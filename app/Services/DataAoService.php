@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use App\Models\DataAo;
+use App\Traits\LogsActivity;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class DataAoService
 {
+    use LogsActivity;
     public function __construct(
         private IdGeneratorService $idGenerator
     ) {
@@ -40,7 +42,14 @@ class DataAoService
             $data['ID_AO'] = $this->idGenerator->generate('data-ao');
         }
 
-        return DataAo::create($data);
+        return $this->performWithLog('create', function() use ($data) {
+            return DataAo::create($data);
+        }, [
+            'resource_type' => 'data_ao',
+            'resource_id' => $data['ID_AO'] ?? null,
+            'description' => 'Menambahkan data AO: ' . ($data['ID_AO'] ?? 'Unknown'),
+            'new_data' => $data,
+        ]);
     }
 
     public function find(string $id): DataAo
@@ -53,15 +62,31 @@ class DataAoService
      */
     public function update(string $id, array $data): DataAo
     {
-        $record = $this->find($id);
-        $record->update($data);
-
-        return $record;
+        $old = $this->find($id);
+        
+        return $this->performWithLog('update', function() use ($old, $data) {
+            $old->update($data);
+            return $old->fresh();
+        }, [
+            'resource_type' => 'data_ao',
+            'resource_id' => $id,
+            'description' => 'Mengupdate data AO: ' . $id,
+            'old_data' => $old->toArray(),
+            'new_data' => $data,
+        ]);
     }
 
     public function delete(string $id): void
     {
         $record = $this->find($id);
-        $record->delete();
+        
+        $this->performWithLog('delete', function() use ($record) {
+            $record->delete();
+        }, [
+            'resource_type' => 'data_ao',
+            'resource_id' => $id,
+            'description' => 'Menghapus data AO: ' . $id,
+            'old_data' => $record->toArray(),
+        ]);
     }
 }

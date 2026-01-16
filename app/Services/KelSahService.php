@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use App\Models\KelSah;
+use App\Traits\LogsActivity;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class KelSahService
 {
+    use LogsActivity;
     public function __construct(
         private IdGeneratorService $idGenerator
     ) {
@@ -44,7 +46,14 @@ class KelSahService
             $data['ID_KEL'] = $this->idGenerator->generate('kel-sah');
         }
 
-        return KelSah::create($data);
+        return $this->performWithLog('create', function() use ($data) {
+            return KelSah::create($data);
+        }, [
+            'resource_type' => 'kel_sah',
+            'resource_id' => $data['ID_KEL'] ?? null,
+            'description' => 'Menambahkan keluarga sejahtera: ' . ($data['ID_KEL'] ?? 'Unknown'),
+            'new_data' => $data,
+        ]);
     }
 
     public function find(string $id): KelSah
@@ -57,15 +66,31 @@ class KelSahService
      */
     public function update(string $id, array $data): KelSah
     {
-        $record = $this->find($id);
-        $record->update($data);
-
-        return $record;
+        $old = $this->find($id);
+        
+        return $this->performWithLog('update', function() use ($old, $data) {
+            $old->update($data);
+            return $old->fresh();
+        }, [
+            'resource_type' => 'kel_sah',
+            'resource_id' => $id,
+            'description' => 'Mengupdate keluarga sejahtera: ' . $id,
+            'old_data' => $old->toArray(),
+            'new_data' => $data,
+        ]);
     }
 
     public function delete(string $id): void
     {
         $record = $this->find($id);
-        $record->delete();
+        
+        $this->performWithLog('delete', function() use ($record) {
+            $record->delete();
+        }, [
+            'resource_type' => 'kel_sah',
+            'resource_id' => $record->ID_KEL,
+            'description' => 'Menghapus keluarga sejahtera: ' . $record->ID_KEL,
+            'old_data' => $record->toArray(),
+        ]);
     }
 }

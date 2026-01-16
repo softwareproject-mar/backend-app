@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use App\Models\DataJlhKeluarga;
+use App\Traits\LogsActivity;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class DataJlhKeluargaService
 {
+    use LogsActivity;
     /**
      * Paginate data_jlh_keluarga with optional filters.
      *
@@ -28,7 +30,14 @@ class DataJlhKeluargaService
      */
     public function create(array $data): DataJlhKeluarga
     {
-        return DataJlhKeluarga::create($data);
+        return $this->performWithLog('create', function() use ($data) {
+            return DataJlhKeluarga::create($data);
+        }, [
+            'resource_type' => 'data_jlh_keluarga',
+            'resource_id' => $data['NO_AGT'] ?? null,
+            'description' => 'Menambahkan data jumlah keluarga: ' . ($data['NO_AGT'] ?? 'Unknown'),
+            'new_data' => $data,
+        ]);
     }
 
     public function find(string $id): DataJlhKeluarga
@@ -41,15 +50,31 @@ class DataJlhKeluargaService
      */
     public function update(string $id, array $data): DataJlhKeluarga
     {
-        $record = $this->find($id);
-        $record->update($data);
-
-        return $record;
+        $old = $this->find($id);
+        
+        return $this->performWithLog('update', function() use ($old, $data) {
+            $old->update($data);
+            return $old->fresh();
+        }, [
+            'resource_type' => 'data_jlh_keluarga',
+            'resource_id' => $id,
+            'description' => 'Mengupdate data jumlah keluarga: ' . $id,
+            'old_data' => $old->toArray(),
+            'new_data' => $data,
+        ]);
     }
 
     public function delete(string $id): void
     {
         $record = $this->find($id);
-        $record->delete();
+        
+        $this->performWithLog('delete', function() use ($record) {
+            $record->delete();
+        }, [
+            'resource_type' => 'data_jlh_keluarga',
+            'resource_id' => $id,
+            'description' => 'Menghapus data jumlah keluarga: ' . $id,
+            'old_data' => $record->toArray(),
+        ]);
     }
 }
