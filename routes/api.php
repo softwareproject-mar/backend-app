@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\ActivityLogController;
 use App\Http\Controllers\Api\AnggotaController;
+use App\Http\Controllers\Api\AnggotaImportController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DataAoController;
@@ -84,6 +85,28 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Full CRUD resources
     Route::apiResource('anggota', AnggotaController::class);
+    Route::get('import-anggota-firebird', [AnggotaImportController::class, 'index']);
+    Route::get('import-anggota-firebird/{noAgt}', [AnggotaImportController::class, 'preview']);
+    Route::post('import-anggota-firebird', [AnggotaImportController::class, 'import']);
+    
+    // Test route for Firebird connection (REMOVE after testing)
+    Route::get('test-firebird-connection', function() {
+        try {
+            $firebird = app(\App\Services\FirebirdService::class);
+            $connected = $firebird->testConnection();
+            
+            return response()->json([
+                'message' => $connected ? 'Firebird connection successful' : 'Firebird connection failed',
+                'connected' => $connected
+            ], $connected ? 200 : 500);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Firebird connection error',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    });
+    
     Route::apiResource('kel-sah', KelSahController::class);
     Route::apiResource('data-lo', DataLoController::class);
     Route::apiResource('data-ao', DataAoController::class);

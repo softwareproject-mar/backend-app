@@ -113,6 +113,16 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        'firebird' => [
+            'driver' => 'firebird',
+            'host' => env('FIREBIRD_HOST', 'localhost'),
+            'port' => env('FIREBIRD_PORT', '3050'),
+            'database' => env('FIREBIRD_DATABASE'),
+            'username' => env('FIREBIRD_USERNAME', 'SYSDBA'),
+            'password' => env('FIREBIRD_PASSWORD', 'masterkey'),
+            'charset' => env('FIREBIRD_CHARSET', 'UTF8'),
+        ],
+
     ],
 
     /*
