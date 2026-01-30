@@ -44,13 +44,13 @@ class AuthService
 
         if (! $user || ! Hash::check($credentials['password'], $user->password)) {
             throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
+                'email' => ['Email atau password anda salah.'],
             ]);
         }
 
         if (! $user->is_active) {
             throw ValidationException::withMessages([
-                'email' => ['Your account has been deactivated.'],
+                'email' => ['Akun Anda telah dinonaktifkan.'],
             ]);
         }
 

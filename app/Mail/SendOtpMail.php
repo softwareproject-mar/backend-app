@@ -28,8 +28,8 @@ class SendOtpMail extends Mailable
     public function envelope(): Envelope
     {
         $subjectPrefix = $this->purpose === 'password_reset'
-            ? 'Password Reset OTP'
-            : 'Your OTP Code';
+            ? 'OTP Reset Kata Sandi'
+            : 'Kode OTP Anda';
 
         return new Envelope(
             subject: $subjectPrefix . ' - ' . config('app.name'),

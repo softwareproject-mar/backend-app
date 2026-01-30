@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your OTP Code</title>
+    <title>Kode OTP Anda</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -51,27 +51,27 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Email Verification</h1>
+            <h1>Verifikasi Email</h1>
         </div>
 
-        <p>Hello,</p>
+        <p>Halo,</p>
         
-        <p>You have requested an OTP code to verify your email address: <strong>{{ $email }}</strong></p>
+        <p>Kami menerima permintaan verifikasi untuk alamat email berikut: <strong>{{ $email }}</strong></p>
 
         <div class="otp-box">
             {{ $otp }}
         </div>
 
         <div class="info">
-            <strong>⏱️ Important:</strong> This OTP code will expire in <strong>{{ $expiryMinutes }} minutes</strong>.
+            <strong>Penting:</strong> Kode ini berlaku selama <strong>{{ $expiryMinutes }} menit</strong>.
         </div>
 
-        <p>Please enter this code in the registration form to complete your sign-up process.</p>
+        <p>Gunakan kode verifikasi di atas untuk melanjutkan proses.</p>
 
-        <p><strong>Note:</strong> If you did not request this code, please ignore this email.</p>
+        <p><strong>Jika Anda tidak merasa meminta kode ini, abaikan email ini.</strong></p>
 
         <div class="footer">
-            <p>This is an automated message. Please do not reply to this email.</p>
+            <p>Email ini dikirim otomatis, mohon tidak membalas.</p>
             <p>&copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
         </div>
     </div>
