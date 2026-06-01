@@ -36,6 +36,6 @@ return [
     |
     */
 
-    'rate_limit' => env('OTP_RATE_LIMIT', 3),
+    'rate_limit' => env('OTP_RATE_LIMIT', 10),
 
 ];

@@ -18,6 +18,7 @@ class DataPengelolaResource extends JsonResource
             'ID_PENG' => $this->ID_PENG,
             'NO_AGT' => $this->NO_AGT,
             'NO_SK' => $this->NO_SK,
+            'NAMA' => $this->anggota_nama ?? $this->anggota?->NAMA,
         ];
     }
 }

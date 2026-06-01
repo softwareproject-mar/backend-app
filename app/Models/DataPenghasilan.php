@@ -2,24 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class DataPenghasilan extends Model
+class DataPenghasilan extends FirebirdLegacyModel
 {
     protected $table = 'data_penghasilan';
 
-    protected $primaryKey = 'NO_AGT';
+    protected $primaryKey = 'ID';
 
     public $incrementing = false;
 
-    protected $keyType = 'string';
+    protected $keyType = 'int';
 
     public $timestamps = false;
 
     protected $fillable = [
+        'ID',
         'NO_AGT',
         'PENGHASILAN',
         'PENGELUARAN',
         'TGL_DATA',
+        'created_by',
     ];
 }

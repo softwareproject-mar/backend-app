@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ActivityLogResource;
 use App\Models\ActivityLog;
+use App\Support\CaseInsensitiveSearch;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -15,9 +16,12 @@ class ActivityLogController extends Controller
      */
     public function index(Request $request)
     {
-        $query = ActivityLog::query()
-            ->where('user_id', auth()->id()) // Only show user's own logs
-            ->orderBy('created_at', 'desc');
+        $query = ActivityLog::query()->orderBy('created_at', 'desc');
+
+        // Admin & Super Admin: semua aktivitas sistem. User biasa: hanya aktivitas sendiri
+        if (! in_array(auth()->user()?->role ?? '', ['admin', 'super_admin'])) {
+            $query->where('user_id', auth()->id());
+        }
 
         // Apply filters
         if ($request->has('resource_type')) {
@@ -41,15 +45,18 @@ class ActivityLogController extends Controller
         }
 
         if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('description', 'like', "%{$search}%")
-                  ->orWhere('user_name', 'like', "%{$search}%");
-            });
+            CaseInsensitiveSearch::applyOrLikeContainsGroup($query, [
+                'description',
+                'user_name',
+                'resource_type',
+                'action_type',
+                'status',
+                'created_at',
+            ], (string) $request->search);
         }
 
         // Pagination
-        $perPage = min($request->integer('per_page', 10), 50);
+        $perPage = min($request->integer('per_page', 100000), 999999);
         $logs = $query->paginate($perPage);
 
         return ActivityLogResource::collection($logs);

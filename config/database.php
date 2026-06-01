@@ -113,7 +113,27 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        /*
+         * Koneksi utama saat DB_CONNECTION=firebird — pakai variabel DB_* (sama seperti mysql).
+         * Firebird import/legacy (DB_LO_OM) memakai koneksi `firebird_legacy` + variabel FIREBIRD_*.
+         */
         'firebird' => [
+            'driver' => 'firebird',
+            'host' => env('DB_HOST', 'localhost'),
+            'port' => env('DB_PORT', '3050'),
+            'database' => env('DB_DATABASE'),
+            'username' => env('DB_USERNAME', 'SYSDBA'),
+            'password' => env('DB_PASSWORD', ''),
+            'charset' => env('FIREBIRD_CHARSET', 'UTF8'),
+            /*
+             * PDO Firebird mengembalikan nama kolom uppercase; Eloquent mengharapkan key lowercase.
+             */
+            'options' => extension_loaded('pdo_firebird') ? [
+                \PDO::ATTR_CASE => \PDO::CASE_LOWER,
+            ] : [],
+        ],
+
+        'firebird_legacy' => [
             'driver' => 'firebird',
             'host' => env('FIREBIRD_HOST', 'localhost'),
             'port' => env('FIREBIRD_PORT', '3050'),
@@ -121,6 +141,9 @@ return [
             'username' => env('FIREBIRD_USERNAME', 'SYSDBA'),
             'password' => env('FIREBIRD_PASSWORD', 'masterkey'),
             'charset' => env('FIREBIRD_CHARSET', 'UTF8'),
+            'options' => extension_loaded('pdo_firebird') ? [
+                \PDO::ATTR_CASE => \PDO::CASE_LOWER,
+            ] : [],
         ],
 
     ],
@@ -188,6 +211,17 @@ return [
             'backoff_cap' => env('REDIS_BACKOFF_CAP', 1000),
         ],
 
+    ],
+
+    /*
+     * Opsi untuk paket danidoble/laravel-firebird: grammar membaca database.firebird.*,
+     * bukan connections.firebird. Firebird 2.5: true; Firebird 3+: bisa false.
+     */
+    'firebird' => [
+        'legacy_limit_and_offset' => filter_var(
+            env('FIREBIRD_LEGACY_LIMIT_OFFSET', true),
+            FILTER_VALIDATE_BOOL
+        ),
     ],
 
 ];

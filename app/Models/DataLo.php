@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class DataLo extends Model
+class DataLo extends FirebirdLegacyModel
 {
     protected $table = 'data_lo';
 

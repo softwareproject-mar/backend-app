@@ -15,6 +15,7 @@ class DataJlhKeluargaResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->getKey(),
             'NO_AGT' => $this->NO_AGT,
             'JLH_AGT_KEL' => $this->JLH_AGT_KEL,
             'TGL' => $this->TGL,

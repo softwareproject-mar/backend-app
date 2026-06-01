@@ -19,8 +19,6 @@ class UpdateAnggotaRequest extends FormRequest
         return [
             'NAMA' => ['nullable', 'string', 'max:255'],
             'ID_KS' => ['nullable', 'string', 'max:12'],
-            'ID_LO' => ['nullable', 'string', 'max:12'],
-            'ID_AO' => ['nullable', 'string', 'max:12'],
             'ID_KS_ASL' => ['nullable', 'string', 'max:12'],
             'TGL_MTS' => ['nullable', 'string', 'max:50'],
             'TGL_AKTIF' => ['nullable', 'string', 'max:50'],

@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class DataKunjungan extends Model
+class DataKunjungan extends FirebirdLegacyModel
 {
     protected $table = 'data_kunjungan';
 
@@ -24,5 +22,9 @@ class DataKunjungan extends Model
         'KEGIATAN',
         'ID_PIC',
         'JLH_PESERTA',
+        'FOTO_PATH',
+        'LATITUDE',
+        'LONGITUDE',
+        'created_by',
     ];
 }

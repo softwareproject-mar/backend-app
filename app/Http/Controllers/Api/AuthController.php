@@ -5,12 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ForgotPasswordRequest;
 use App\Http\Requests\LoginRequest;
-use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\RegisterWithOtpRequest;
-use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Requests\RequestOtpRequest;
+use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Requests\VerifyResetOtpRequest;
 use App\Http\Resources\UserResource;
+use App\Jobs\NotifyAdminsPendingRegistrationJob;
+use App\Jobs\NotifyAdminsPendingRegistrationReminderJob;
 use App\Jobs\SendOtpEmailJob;
 use App\Models\EmailVerification;
 use App\Models\User;
@@ -27,8 +28,7 @@ class AuthController extends Controller
         private AuthService $service,
         private OtpService $otpService,
         private PasswordResetService $passwordResetService
-    ) {
-    }
+    ) {}
 
     /**
      * Request OTP for email verification.
@@ -38,7 +38,7 @@ class AuthController extends Controller
         $email = $request->validated()['email'];
 
         // Check rate limit
-        if (!$this->otpService->checkRateLimit($email)) {
+        if (! $this->otpService->checkRateLimit($email, 'register')) {
             return response()->json([
                 'message' => 'Too many requests. Please try again later.',
             ], Response::HTTP_TOO_MANY_REQUESTS);
@@ -68,7 +68,7 @@ class AuthController extends Controller
         $data = $request->validated();
 
         // Verify OTP
-        if (!$this->otpService->verifyOtp($data['email'], $data['otp'], 'register')) {
+        if (! $this->otpService->verifyOtp($data['email'], $data['otp'], 'register')) {
             return response()->json([
                 'message' => 'Invalid or expired OTP code',
                 'errors' => [
@@ -77,16 +77,46 @@ class AuthController extends Controller
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        // Create user with email verified
-        $user = $this->service->register($data, true);
+        // Pendaftar publik: selalu user, nonaktif, menunggu persetujuan admin (hindari default DB "approved").
+        $data['role'] = 'user';
+        $data['is_active'] = false;
+        $data['registration_status'] = User::REGISTRATION_PENDING;
 
-        // Generate token
+        $existing = User::query()->where('email', $data['email'])->first();
+
+        if ($existing !== null) {
+            if ($existing->role !== 'user' || $existing->registration_status !== User::REGISTRATION_REJECTED) {
+                return response()->json([
+                    'message' => 'Email ini sudah terdaftar. Gunakan email lain atau login jika akun sudah aktif.',
+                    'errors' => [
+                        'email' => ['Email ini sudah terdaftar.'],
+                    ],
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
+            $user = $this->service->reapplyRejectedUser($existing, $data, true);
+        } else {
+            $user = $this->service->register($data, true);
+        }
+
+        // Token dulu: gagal PAT lebih mudah di-debug daripada insert queue.
         $token = $user->createToken('auth_token')->plainTextToken;
 
         // Delete used OTP
         EmailVerification::where('email', $data['email'])
             ->where('purpose', 'register')
             ->delete();
+
+        // Kirim notifikasi awal segera (setelah response).
+        NotifyAdminsPendingRegistrationJob::dispatch($user->id)->afterResponse();
+
+        // Reminder H+3 hanya valid untuk queue async; pada queue "sync" delay dapat terabaikan
+        // sehingga email reminder terkirim langsung setelah email awal.
+        if (config('queue.default') !== 'sync') {
+            NotifyAdminsPendingRegistrationReminderJob::dispatch($user->id)
+                ->delay(now()->addDays(3))
+                ->afterResponse();
+        }
 
         return response()->json([
             'user' => new UserResource($user),
@@ -101,7 +131,7 @@ class AuthController extends Controller
     {
         $email = $request->validated()['email'];
 
-        if (! $this->otpService->checkRateLimit($email)) {
+        if (! $this->otpService->checkRateLimit($email, 'password_reset')) {
             return response()->json([
                 'message' => 'Too many requests. Please try again later.',
             ], Response::HTTP_TOO_MANY_REQUESTS);

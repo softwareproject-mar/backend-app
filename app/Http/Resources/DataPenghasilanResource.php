@@ -15,6 +15,7 @@ class DataPenghasilanResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->getKey(),
             'NO_AGT' => $this->NO_AGT,
             'PENGHASILAN' => $this->PENGHASILAN,
             'PENGELUARAN' => $this->PENGELUARAN,

@@ -2,21 +2,20 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class DataTrs extends Model
+class DataTrs extends FirebirdLegacyModel
 {
     protected $table = 'data_trs';
 
-    protected $primaryKey = 'NO_AGT';
+    protected $primaryKey = 'ID';
 
     public $incrementing = false;
 
-    protected $keyType = 'string';
+    protected $keyType = 'int';
 
     public $timestamps = false;
 
     protected $fillable = [
+        'ID',
         'NO_AGT',
         'STR_SP',
         'STR_SW',
@@ -33,5 +32,6 @@ class DataTrs extends Model
         'STR_SRY',
         'STR_SMD',
         'TGL_LAP',
+        'created_by',
     ];
 }

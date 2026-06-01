@@ -19,8 +19,7 @@ class SendOtpMail extends Mailable
         public string $otp,
         public string $email,
         public string $purpose = 'register'
-    ) {
-    }
+    ) {}
 
     /**
      * Get the message envelope.
@@ -32,7 +31,7 @@ class SendOtpMail extends Mailable
             : 'Kode OTP Anda';
 
         return new Envelope(
-            subject: $subjectPrefix . ' - ' . config('app.name'),
+            subject: $subjectPrefix.' - '.config('app.name'),
         );
     }
 
@@ -47,6 +46,7 @@ class SendOtpMail extends Mailable
                 'otp' => $this->otp,
                 'email' => $this->email,
                 'expiryMinutes' => config('otp.expiry_minutes', 5),
+                'purpose' => $this->purpose,
             ],
         );
     }

@@ -18,7 +18,7 @@ class IdGeneratorServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new IdGeneratorService();
+        $this->service = new IdGeneratorService;
 
         // Seed id_sequences table ONLY if empty
         if (DB::table('id_sequences')->count() === 0) {
@@ -134,5 +134,17 @@ class IdGeneratorServiceTest extends TestCase
         $this->assertEquals('5', $config['kode_role']);
         $this->assertEquals('data_ao', $config['table']);
         $this->assertEquals('ID_AO', $config['id_field']);
+    }
+
+    public function test_bootstraps_id_sequence_row_when_missing(): void
+    {
+        DB::table('id_sequences')->where('entity_type', 'sekre-ks')->delete();
+        $this->assertSame(0, DB::table('id_sequences')->where('entity_type', 'sekre-ks')->count());
+
+        $id = $this->service->generate('sekre-ks');
+
+        $this->assertSame(12, strlen($id));
+        $this->assertSame('4', substr($id, 6, 1));
+        $this->assertTrue(DB::table('id_sequences')->where('entity_type', 'sekre-ks')->exists());
     }
 }

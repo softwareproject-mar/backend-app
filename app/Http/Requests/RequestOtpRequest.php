@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RequestOtpRequest extends FormRequest
@@ -22,7 +23,24 @@ class RequestOtpRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'email', 'unique:users,email'],
+            'email' => [
+                'required',
+                'email',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    $email = is_string($value) ? trim($value) : '';
+                    if ($email === '') {
+                        return;
+                    }
+                    $user = User::query()->where('email', $email)->first();
+                    if ($user === null) {
+                        return;
+                    }
+                    if ($user->role === 'user' && $user->registration_status === User::REGISTRATION_REJECTED) {
+                        return;
+                    }
+                    $fail('Email ini sudah dipakai. Gunakan email lain atau tunggu persetujuan jika masih mendaftar.');
+                },
+            ],
         ];
     }
 
@@ -36,7 +54,6 @@ class RequestOtpRequest extends FormRequest
         return [
             'email.required' => 'Email address is required.',
             'email.email' => 'Please provide a valid email address.',
-            'email.unique' => 'The email has already been taken.',
         ];
     }
 }

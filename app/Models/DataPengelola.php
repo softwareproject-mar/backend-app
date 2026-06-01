@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class DataPengelola extends Model
+class DataPengelola extends FirebirdLegacyModel
 {
     protected $table = 'data_pengelola';
 
@@ -21,4 +21,9 @@ class DataPengelola extends Model
         'NO_AGT',
         'NO_SK',
     ];
+
+    public function anggota(): BelongsTo
+    {
+        return $this->belongsTo(Anggota::class, 'NO_AGT', 'NO_AGT');
+    }
 }

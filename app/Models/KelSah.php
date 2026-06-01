@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class KelSah extends Model
+class KelSah extends FirebirdLegacyModel
 {
     protected $table = 'kel_sah';
 

@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\NoAgtBelongsToMemberKelompok;
+use App\Support\MemberScope;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreDataKunjunganRequest extends FormRequest
@@ -11,7 +13,18 @@ class StoreDataKunjunganRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return MemberScope::isRestrictedMemberUser($this->user());
+    }
+
+    protected function prepareForValidation(): void
+    {
+        // Remove created_by from input (security)
+        $data = collect($this->all())->except('created_by')->all();
+
+        // NO_AGT is now a regular input field - no auto-injection
+        // Users must input NO_AGT manually
+
+        $this->replace($data);
     }
 
     /**
@@ -22,13 +35,22 @@ class StoreDataKunjunganRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'NO_AGT' => [
+                'required',
+                'string',
+                'max:15',
+                'exists:anggota,NO_AGT',
+                new NoAgtBelongsToMemberKelompok,
+            ],
             'ID_LO' => ['nullable', 'string', 'max:12'],
-            'NO_AGT' => ['nullable', 'string', 'max:15'],
             'ID_KEL_SAH' => ['nullable', 'string', 'max:12'],
             'TGL_KUN' => ['nullable', 'string', 'max:50'],
             'KEGIATAN' => ['nullable', 'string', 'max:50'],
             'ID_PIC' => ['nullable', 'string', 'max:50'],
             'JLH_PESERTA' => ['nullable', 'integer'],
+            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:4096'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ];
     }
 }

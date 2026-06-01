@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Realisasi extends Model
+class Realisasi extends FirebirdLegacyModel
 {
     protected $table = 'realisasi';
 
@@ -48,7 +46,7 @@ class Realisasi extends Model
     protected function setKeysForSaveQuery($query)
     {
         $query->where('ID_KS', $this->getAttribute('ID_KS'))
-              ->where('TGL_TGT', $this->getAttribute('TGL_TGT'));
+            ->where('TGL_TGT', $this->getAttribute('TGL_TGT'));
 
         return $query;
     }

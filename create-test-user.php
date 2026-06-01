@@ -17,7 +17,8 @@ $user = User::updateOrCreate(
         'password' => Hash::make('password123'),
         'role' => 'admin',
         'is_active' => true,
-        'email_verified_at' => now()
+        'registration_status' => User::REGISTRATION_APPROVED,
+        'email_verified_at' => now(),
     ]
 );
 

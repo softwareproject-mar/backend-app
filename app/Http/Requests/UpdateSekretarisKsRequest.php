@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateSekretarisKsRequest extends FormRequest
 {
@@ -16,12 +17,29 @@ class UpdateSekretarisKsRequest extends FormRequest
      */
     public function rules(): array
     {
+        $idSekre = $this->route('sekretaris_k');
+
         return [
-            'NO_AGT' => ['sometimes', 'string', 'max:15'],
+            'NO_AGT' => [
+                'sometimes',
+                'string',
+                'max:15',
+                Rule::unique('sekre_ks', 'NO_AGT')->ignore($idSekre, 'ID_SEKRE'),
+            ],
             'NAMA' => ['nullable', 'string', 'max:50'],
             'STAT' => ['nullable', 'string', 'max:50'],
             'TGL_STAT' => ['nullable', 'string', 'max:50'],
             'NO_SK' => ['nullable', 'integer'],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'NO_AGT.unique' => 'Nomor anggota ini sudah dipakai sebagai sekretaris kelompok.',
         ];
     }
 }

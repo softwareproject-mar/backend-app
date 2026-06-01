@@ -48,7 +48,7 @@ class OtpService
             ->latest()
             ->first();
 
-        if (!$verification) {
+        if (! $verification) {
             return false;
         }
 
@@ -58,6 +58,7 @@ class OtpService
         // Check if OTP matches and is still valid
         if ($verification->otp_code === $otp && $verification->isValid()) {
             $verification->markAsVerified();
+
             return true;
         }
 
@@ -65,13 +66,14 @@ class OtpService
     }
 
     /**
-     * Check rate limit for OTP requests (max 3 per 10 minutes).
+     * Check rate limit for OTP requests (per purpose + email; max N per 10 minutes).
      */
-    public function checkRateLimit(string $email): bool
+    public function checkRateLimit(string $email, string $purpose = 'register'): bool
     {
-        $key = 'otp_request:' . $email;
+        $normalized = mb_strtolower(trim($email));
+        $key = sprintf('otp_request:%s:%s', $purpose, $normalized);
         $attempts = Cache::get($key, 0);
-        $maxAttempts = config('otp.rate_limit', 3);
+        $maxAttempts = config('otp.rate_limit', 10);
 
         if ($attempts >= $maxAttempts) {
             return false;

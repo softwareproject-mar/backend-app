@@ -12,6 +12,9 @@
 /.vscode
 /.zed
 /auth.json
+# SQL restore bloat (generate dengan database/scripts/build-anggota-restore-sql.php)
+/database/dumps/*.sql
+
 /node_modules
 /public/build
 /public/hot

@@ -22,11 +22,13 @@ class RegisterWithOtpRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'email'],
+            'email' => ['required', 'email', 'max:255'],
             'otp' => ['required', 'string', 'size:6'],
             'name' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role' => ['nullable', 'string', 'in:admin,user'],
+            'device_id' => ['required', 'string', 'max:191'],
+            // Pendaftaran publik hanya boleh akun biasa; admin dibuat lewat panel super admin.
+            'role' => ['sometimes', 'string', 'in:user'],
         ];
     }
 

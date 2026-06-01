@@ -24,6 +24,8 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
+            // Wajib untuk role `user` (aplikasi). Admin/super_admin: opsional (web tanpa device_id; aplikasi dengan device_id untuk ikat perangkat).
+            'device_id' => ['nullable', 'string', 'max:191'],
         ];
     }
 }

@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Anggota extends Model
+class Anggota extends FirebirdLegacyModel
 {
     protected $table = 'anggota';
 
